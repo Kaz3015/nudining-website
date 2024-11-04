@@ -1,18 +1,24 @@
 .foodCard {
   border: 1px solid #ccc;
-  padding: 16px;
+  padding: 10px;
   margin: 10px;
   border-radius: 8px;
   transition: box-shadow 0.3s ease;
+  text-align: center;
 }
+
 
 .foodCard:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .food-card-container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  gap: 1em;
+  /* 3 rows across, equal widths */
+  grid-template-columns: repeat(3, 1fr);
+  /* all rows should take the height of the tallest content */
+  grid-auto-rows: 1fr;
 }
 
 .starRating span {

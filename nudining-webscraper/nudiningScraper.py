@@ -12,12 +12,12 @@ import json
 import os
 import requests
 # Set up Selenium WebDriver
-service = Service('nudining-webscraper\\chromedriver-win64\\chromedriver.exe')
+service = Service('chromedriver-win64\\chromedriver.exe')
  # Update this path to point to your actual chromedriver path
 driver = webdriver.Chrome(service=service)
 
 #Load env variables
-load_dotenv(dotenv_path="C:\\Users\\kzich\Desktop\\NuDiningFrontEnd\\secret.env")
+load_dotenv(dotenv_path="C:\\Users\kzich\\Desktop\\nudining-web\\secret.env")
 print("MONGODB_NAME:", os.getenv("MONGODB_NAME"))
 print("MONGODBURI:", os.getenv("MONGOURI"))
 print("MONGO_COLLECTION_NAME:", os.getenv("MONGO_COLLECTION_NAME"))
@@ -193,6 +193,7 @@ try:
                             for li in li_elements:
                                 # Extract macro name and amount
                                 strong_tag = li.find_element(By.TAG_NAME, 'strong')
+                                print(strong_tag.text)
                                 macro_name = strong_tag.text.strip().rstrip(':')  # Remove the colon at the end
                                 amount = li.text.replace(strong_tag.text, '').strip()  # Remove the macro name from the text
                                 nutritional_info[macro_name] = amount

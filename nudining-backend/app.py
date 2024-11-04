@@ -1,12 +1,13 @@
 import json
 
+from bson import json_util
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from pymongo import MongoClient
+from pymongo import MongoClient, ReturnDocument
 from dotenv import load_dotenv, find_dotenv
 import os
 
-load_dotenv(dotenv_path="C:\\Users\\kzich\\OneDrive\Desktop\\nudining-website\\secret.env")
+load_dotenv(dotenv_path="C:\\Users\\kzich\Desktop\\nudining-web\\secret.env")
 print("MONGODB_NAME:", os.getenv("MONGODB_NAME"))
 print("MONGODBURI:", os.getenv("MONGOURI"))
 print("MONGO_COLLECTION_NAME:", os.getenv("MONGO_COLLECTION_NAME"))
@@ -47,26 +48,23 @@ def getCurrentFoodItems():
         return jsonify(formatted_items)
 
 
-@app.route('/api/rate', methods=['POST'])
+@app.route('/api/rate', methods=['POST', 'GET'])
 def updateRating():
-    @app.route('/api/rate', methods=['POST'])
-    def rate_item():
-        data = request.get_json()
+        data = request.json
         title = data.get('title')
         new_rating = data.get('rating')
 
         # Update the item in the database
-        updated_item = db.your_collection.find_one_and_update(
+        updated_item = collection.find_one_and_update(
             {"title": title},
             {"$inc": {"rating": new_rating, "rating_count": 1}},
-            return_document=True  # Return the updated document
+            return_document=ReturnDocument.AFTER
         )
+        sendItem = json.loads(json_util.dumps(updated_item))
 
-        # Ensure the response is JSON-serializable
-        if updated_item:
-            updated_item = convert_id(updated_item)
 
-        return jsonify(updated_item), 200
+
+        return jsonify(sendItem), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

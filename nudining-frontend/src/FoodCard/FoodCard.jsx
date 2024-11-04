@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './FoodCard.css';
 import Star from '../Star/Star';
+import MacroTable from '../Macros/MacroTable';
 
 function FoodCard({ foodItem, updateRating }) {
   const [isHovered, setIsHovering] = useState(false);
@@ -21,7 +22,7 @@ function FoodCard({ foodItem, updateRating }) {
 
       {isHovered && (
         <div>
-          <h3>Macros: {foodItem.macros}</h3>
+          <MacroTable macros={foodItem.nutritional_info}/>?
           <Star currentRating={averageRating} onRate={handleRating} />
           <h3>Rating Count: {foodItem.rating_count}</h3>
           <h3>Portion Size: {foodItem.portion_size}</h3>
