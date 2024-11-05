@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from jinja2.runtime import Macro
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -117,15 +118,15 @@ try:
                 print(f"Error processing {mealPeriodName} in {hall_name}: {e}")
 
 
-                
-                
 
 
-                    
 
-        
-            
-            
+
+
+
+
+
+
 
             # Step 4: Iterate over each table
             for table_index, table in enumerate(tables):
@@ -191,12 +192,19 @@ try:
 
                             # Iterate over each <li> element
                             for li in li_elements:
-                                # Extract macro name and amount
-                                strong_tag = li.find_element(By.TAG_NAME, 'strong')
-                                print(strong_tag.text)
-                                macro_name = strong_tag.text.strip().rstrip(':')  # Remove the colon at the end
-                                amount = li.text.replace(strong_tag.text, '').strip()  # Remove the macro name from the text
-                                nutritional_info[macro_name] = amount
+                                try:
+                                    text = li.text.strip()
+                                    macro = text.split(":")
+                                    macroName = macro[0]
+                                    macoAmount = macro[1]
+
+
+                                    # Add to nutritional info dictionary
+                                    nutritional_info[macroName] = macoAmount
+                                    print(f"Extracted - {macroName}: {macoAmount}")
+                                except Exception as e:
+                                    print(f"Error parsing li element: {e}")
+                                    continue
 
                             # Close the modal
                             close_button = nutritional_modal.find_element(By.XPATH, ".//button[contains(@class, 'close')]")
