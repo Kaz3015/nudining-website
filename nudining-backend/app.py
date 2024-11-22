@@ -4,10 +4,12 @@ from bson import json_util
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient, ReturnDocument
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv
+from pathlib import Path
 import os
 
-load_dotenv(dotenv_path="C:\\Users\\kzich\Desktop\\nudining-web\\secret.env")
+env_path = Path(__file__).parent.parent / 'secret.env'
+load_dotenv(dotenv_path=env_path)
 print("MONGODB_NAME:", os.getenv("MONGODB_NAME"))
 print("MONGODBURI:", os.getenv("MONGOURI"))
 print("MONGO_COLLECTION_NAME:", os.getenv("MONGO_COLLECTION_NAME"))
@@ -17,10 +19,10 @@ CORS(app)
 
  
 # Set up MongoDB connection
-client = MongoClient(os.getenv("MONGOURI"))  # Adjust the connection string if necessary
-db = client[os.getenv("MONGODB_NAME")]
-collection = db[os.getenv("MONGO_COLLECTION_NAME")]
-collectionToday = db[os.getenv("TODAYSFOOD")]
+client = MongoClient(os.environ.get("MONGOURI"))  # Adjust the connection string if necessary
+db = client[os.environ.get("MONGODB_NAME")]
+collection = db[os.environ.get("MONGO_COLLECTION_NAME")]
+collectionToday = db[os.environ.get("TODAYSFOOD")]
 
 @app.route('/api/getCurrentFoodItems', methods=['GET'])
 def getCurrentFoodItems():
@@ -40,7 +42,8 @@ def getCurrentFoodItems():
                 "nutritional_info": item.get("nutritional_info"),
                 "table_caption": item.get("table_caption"),
                 "rating": item.get("rating"),
-                "rating_count": item.get("rating_count")
+                "rating_count": item.get("rating_count"),
+                "labels": item.get("labels")
             }
             for item in todaysFoodItems
         ]

@@ -11,7 +11,12 @@ function FoodList() {
   const fetchUpdatedFoodItems = () => {
     fetch('http://127.0.0.1:5000/api/getCurrentFoodItems')
       .then(response => response.json())
-      .then(data => setFoodItems(data))
+      .then(data => {
+        data.forEach(item => {
+          console.log(`Item Title: ${item.title}, Labels:`, item.labels);
+        });
+        setFoodItems(data);
+      })
       .catch(error => console.error("Error fetching data:", error));
   };
 
@@ -35,8 +40,8 @@ function FoodList() {
 
   return (
     <div>
-      <h1>Today's Food Items</h1>
-      <div className="food-card-container">
+      <h1 className="text-white text-3xl font-bold mb-6 text-center">Today's Food Items</h1>
+      <div className=" p-4 flex flex-wrap gap-6 justify-start">
         {foodList.map((food, index) => (
           <FoodCard key={index} foodItem={food} updateRating={updateRating} />
         ))}

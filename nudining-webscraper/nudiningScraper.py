@@ -1,11 +1,11 @@
 from dotenv import load_dotenv
-from jinja2.runtime import Macro
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import *
+from pathlib import Path
 
 import time
 from pymongo import MongoClient
@@ -13,12 +13,13 @@ import json
 import os
 import requests
 # Set up Selenium WebDriver
-service = Service('chromedriver-win64\\chromedriver.exe')
  # Update this path to point to your actual chromedriver path
-driver = webdriver.Chrome(service=service)
+driver = webdriver.Chrome()
 
 #Load env variables
-load_dotenv(dotenv_path="C:\\Users\kzich\\Desktop\\nudining-web\\secret.env")
+env_path = Path(__file__).parent.parent / 'secret.env'
+
+load_dotenv(dotenv_path=env_path)
 print("MONGODB_NAME:", os.getenv("MONGODB_NAME"))
 print("MONGODBURI:", os.getenv("MONGOURI"))
 print("MONGO_COLLECTION_NAME:", os.getenv("MONGO_COLLECTION_NAME"))
@@ -59,6 +60,8 @@ try:
 
     # Define valid meal periods
     validNames = ["Breakfast", "Lunch", "Dinner", "Everyday"]
+    #Used to store allergens
+    labels = []
 
     # Function to find a nav link by text
     def find_nav_link_by_text(text):
@@ -112,21 +115,9 @@ try:
                 )
                 tables = driver.find_elements(By.XPATH, f"//table[contains(@role, 'table')]")
 
-                # TODO: Add your code here to process the tables and extract data
 
             except Exception as e:
                 print(f"Error processing {mealPeriodName} in {hall_name}: {e}")
-
-
-
-
-
-
-
-
-
-
-
 
             # Step 4: Iterate over each table
             for table_index, table in enumerate(tables):
@@ -170,6 +161,27 @@ try:
                             portion_size = div_element.text.strip()
                             print(f"Portion Size: {portion_size}")
 
+                            images = row.find_elements(By.TAG_NAME, 'img')
+                            print(f"Image elements: {images}")
+                            for img_element in images:
+                                src = img_element.get_attribute('src')
+                                print(f"Image src: {src}")
+                                veganSrc = "https://www.nudining.com/img/icon_vegetarian.png"
+                                glutenSrc = "https://nudining.com/img/icon_avoiding_gluten.png"
+                                proteinSrc = "https://nudining.com/img/icon_protein.png"
+
+                                if src == veganSrc:
+                                    labels.append("vegan")
+                                elif src == glutenSrc:
+                                    labels.append("gluten")
+                                elif src == proteinSrc:
+                                    labels.append("protein")
+                            print(labels)
+
+
+
+
+
                             # Click the button to open the nutritional modal
                             driver.execute_script("arguments[0].scrollIntoView(true);", button_element)  # Scroll to make it visible
                             time.sleep(1)  # Pause for visibility
@@ -182,9 +194,11 @@ try:
                             )
 
                             # Inside the modal, find the <ul> element
+                            time.sleep(1)
                             ul_element = nutritional_modal.find_element(By.TAG_NAME, 'ul')
 
                             # Find all <li> elements inside the <ul>
+                            time.sleep(1)
                             li_elements = ul_element.find_elements(By.TAG_NAME, 'li')
 
                             # Initialize a dictionary to store nutritional info
@@ -220,12 +234,14 @@ try:
                                 'nutritional_info': json.dumps(nutritional_info),  # Convert dictionary to JSON string
                                 'table_caption': table_caption,
                                 'rating': 0,            # Initialize rating
-                                'rating_count': 0       # Initialize rating count
+                                'rating_count': 0,       # Initialize rating count
+                                'labels': json.dumps(labels)
                             }
 
                             # Insert the item into MongoDB
                             collection.insert_one(item_data)
                             print(f"Inserted item '{title}' with caption '{table_caption}' into the database.")
+                            labels = []
                             print("-" * 50)
 
                         except Exception as e:
